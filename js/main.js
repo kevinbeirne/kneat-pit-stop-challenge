@@ -86,8 +86,11 @@ Main.prototype.getStarships = function(ctx) {
 
 };
 
-Main.prototype.updatePitstops = function(res, distance) {
+Main.prototype.updatePitstops = function(res) {
 this.toggleLoading();
+this.clearSpaceships();
+
+var distance = this.getDistance();
   console.log("res");
   console.log(res);
   console.log(res.length);
@@ -97,14 +100,15 @@ this.toggleLoading();
     var AMOUNT = 0;
     var UNIT = 1;
     var consumables = res[i].consumables.split(" ");
-    var consumablesInHours = -1;
+    var consumablesInHours = -1;//Fix this
     if(consumables.length == 2){
-      var consumablesInHours = this.getConsumablesInHours(consumables[AMOUNT], consumables[UNIT]);
+      consumablesInHours = this.getConsumablesInHours(consumables[AMOUNT], consumables[UNIT]);
     }
-
     if(distance < 0 || consumablesInHours < 0 || res[i].MGLT == "unknown" || res[i].MGLT < 0){
       this.displaySpaceship(res[i].name, "unknown");
     } else {
+    console.log("consumablesInHours");
+    console.log(consumablesInHours);
       var stopsRequired = Math.floor(distance / (res[i].MGLT * consumablesInHours));
       this.displaySpaceship(res[i].name, stopsRequired);
     }
@@ -112,12 +116,27 @@ this.toggleLoading();
 
 };
 
+Main.prototype.clearSpaceships = function(name, detail) {
+  var starshipList = document.getElementById(this.STARSHIP_LIST);
+  if(starshipList) {
+    starshipList.innerHTML = "";
+  }
+}
+
 /**
 * @param {string} name The name of the ship we want to display
 * @param {string} detail The detail about this ship we want to display
 */
 Main.prototype.displaySpaceship = function(name, detail) {
   console.log(name + ": " + detail);
+  var starshipList = document.getElementById(this.STARSHIP_LIST);
+  if(starshipList) {
+    var li = document.createElement("li");
+    var span = document.createElement("span");
+    span.appendChild(document.createTextNode(name + ": " + detail));
+    li.appendChild(span);
+    starshipList.appendChild(li);
+  }
 };
 
 /**
@@ -131,16 +150,19 @@ Main.prototype.getConsumablesInHours = function(amount, unit) {
 
   var consumablesInHours = -1;
 
-  if(!isNaN(consumables[AMOUNT]) && typeof(consumables[UNIT] == "string")) {
-    consumablesInHours = consumables[AMOUNT];
-    if(consumables[UNIT].startsWith("day")) {
+  if(!isNaN(amount) && typeof(unit == "string")) {
+    consumablesInHours = amount;
+
+    if(unit.startsWith("day")) {
       consumablesInHours *= HOURS_PER_YEAR / DAYS_PER_YEAR;
-    } else if(consumables[UNIT].startsWith("week")) {
+    } else if(unit.startsWith("week")) {
       consumablesInHours *= HOURS_PER_YEAR / WEEKS_PER_YEAR;
-    } else if(consumables[UNIT].startsWith("month")) {
+    } else if(unit.startsWith("month")) {
       consumablesInHours *= HOURS_PER_YEAR / MONTHS_PER_YEAR;
-    } else if (consumables[UNIT].startsWith("year")) {
+    } else if (unit.startsWith("year")) {
       consumablesInHours *= HOURS_PER_YEAR;
+    } else {
+      consumablesInHours = -1;
     }
   }
   return consumablesInHours;
