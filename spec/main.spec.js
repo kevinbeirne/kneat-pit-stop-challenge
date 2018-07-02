@@ -1,8 +1,13 @@
-import {Main} from '../src/js/main.js';
+//require('../js/swApiManager.js');
+//require('../js/main.js');
 
 describe("Main", function() {
   var main;
   beforeEach(function() {
+    console.log("jasmine");
+    console.log(jasmine);
+    jasmine.getFixtures().fixturesPath = 'fixtures/';
+    jasmine.getFixtures().load('main.html');
     main = new Main();
   });
 
