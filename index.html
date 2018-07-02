@@ -12,9 +12,10 @@
   <div>
     <h1>Star Wars Pitstop Calculator</h1>
     <h2>How far are you planning to travel? (in mega lights)</h2>
-    <input type="number" min="0" id="mglt-input" />
+    <input type="number" min="1" id="mglt-input" required />
     <button id="mglt-calculate-btn">Calculate pitstops</button>
-    <div class="loading-spinner"></div>
+    <div id="loader" class="loading-spinner"></div>
+    <span id="error-message"></span>
     <ul id="starship-list">
     </ul>
   </div>

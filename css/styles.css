@@ -1,0 +1,7 @@
+input:invalid {
+  background-color: pink;
+}
+
+.error-message {
+  display: block;
+}
