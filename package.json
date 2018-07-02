@@ -19,12 +19,8 @@
         "nodemon": "^1.17.5"
     },
     "dependencies": {
-        "connect": "^3.6.6",
         "express": "^4.16.3",
         "jasmine-jquery": "^2.1.1",
-        "promise-polyfill": "8.0.0",
-        "require": "^2.4.20",
-        "requirejs": "^2.3.5",
-        "serve-static": "^1.13.2"
+        "promise-polyfill": "8.0.0"
     }
 }
