@@ -1,5 +1,3 @@
-
-
 /**
 * Defaults the loading to false and establishes constants for our error messages and DOM elements
 * @constructor Main
@@ -8,15 +6,13 @@
 * all the starships and the total amount of stops required to make the given distance.
 * It will give feedback to the user about whether their request was successful
 */
-function Main() {
+var Main = (function() {
+  var starshipManager = require("./starshipManager");
+
   /**
   * @member {boolean}
   */
   var loading = false;
-  /**
-  * @member {StarshipManager}
-  */
-  var starshipManager = null;
   /**
   * @member {string}
   * @const
@@ -64,8 +60,8 @@ function Main() {
   * Initialises the app and enables user controls to calculate starship pitstops
   * @memberof Main
   */
-  Main.prototype.init = function() {
-    starshipManager = new StarshipManager();
+  var init = function() {
+    //starshipManager = new StarshipManager();
     var calculateBtn = document.getElementById(CALCULATE_BUTTON);
 
     if(calculateBtn) {
@@ -260,9 +256,19 @@ function Main() {
     console.log(title + " is working!");
     return true;
   };
-}
+
+
+  return {
+    init: init,
+    isWorking: isWorking
+  };
+})();
 
 (function(){
-  var m = new Main();
-  m.init();
+  Main.init();
 })();
+
+if ( typeof module !== 'undefined' && module.hasOwnProperty('exports') )
+{
+    module.exports = Main;
+}

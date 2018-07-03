@@ -4,7 +4,7 @@
 * @classdesc This StarshipManager will allow a user to request starships and perform actions on a given starship
 * e.g. Get a given starship's consumables available in hours
 */
-StarshipManager = function(){
+var StarshipManager = (function(){
   /**
   * @member {string}
   */
@@ -15,12 +15,12 @@ StarshipManager = function(){
   * This will load a batch of starships from the swapi.
   * @return {Promise<Object[]>} A promise that will resolve with an array of starships if they are successfully loaded. Is null if all starships have been loaded. Another request to this service after it returns null will begin loading the starships from the beginning
   */
-  StarshipManager.prototype.loadMoreStarships = function() {
+  var loadMoreStarships = function() {
     if(!nextRequest) {//Reached the end of our requests, let user know by returning null
       nextRequest = "https://swapi.co/api/starships/";
       return null;
     }
-    
+
     return new Promise(function(resolve, reject) {
       var xhttp = new XMLHttpRequest();
       var results = [];
@@ -63,7 +63,7 @@ StarshipManager = function(){
   * @param {Object} starship An object which is expected to have the property "consumables" which should take the format "number unit" e.g. "5 days", "7 years" etc.
   * @return {number} The amount of consumables the given starship has, measured in hours
   */
-  StarshipManager.prototype.getConsumablesInHours = function(starship) {
+  var getConsumablesInHours = function(starship) {
     var AMOUNT = 0;
     var UNIT = 1;
     var consumables = starship.consumables.split(" ");
@@ -105,4 +105,14 @@ StarshipManager = function(){
     return amountInHours;
   };
 
-};
+  return {
+    getConsumablesInHours: getConsumablesInHours,
+    loadMoreStarships: loadMoreStarships
+  };
+})();
+
+
+if ( typeof module !== 'undefined' && module.hasOwnProperty('exports') )
+{
+    module.exports = StarshipManager;
+}
