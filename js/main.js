@@ -126,8 +126,6 @@ function Main() {
   */
   var updatePitstops = function(starships) {
     var distance = getDistance();
-console.log("got starships");
-console.log(starships);
     for(var i = 0; i < starships.length; i++) {
       var consumablesInHours = starshipManager.getConsumablesInHours(starships[i]);
 
@@ -149,15 +147,10 @@ console.log(starships);
   * @param {string} detail The detail about this ship we want to display
   */
   var displayStarship = function(name, detail) {
-    console.log("displaying..." + name + ": " + detail);
     var starshipTable = document.getElementById(STARSHIP_LIST);
-    console.log("starshipTable");
-    console.log(starshipTable);
     if(starshipTable) {
 
       var tbody = starshipTable.getElementsByTagName('tbody');
-      console.log("tbody");
-      console.log(tbody);
       if(tbody && tbody.length > 0 && tbody[0]) {
         var tr = document.createElement("tr");
         var tdName = document.createElement("td");
