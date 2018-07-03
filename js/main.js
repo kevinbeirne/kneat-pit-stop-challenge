@@ -1,8 +1,9 @@
 
 
 /**
-* @constructor
-* This class controls the DOM for our pitstop calculator app
+* Defaults the loading to false and establishes constants for our error messages and DOM elements
+* @constructor Main
+* @classdesc This class controls the DOM for our pitstop calculator app
 * It will set up an interface that allows a user to enter a number of Megalights and will display
 * all the starships and the total amount of stops required to make the given distance.
 * It will give feedback to the user about whether their request was successful
@@ -11,19 +12,45 @@ function Main() {
   this.loading = false;
 
   /**
-  * Errors
+  * @member {string}
+  * @memberof Main
   */
   this.DISTANCE_ERROR = "Please enter a valid distance";
+  /**
+  * @member {string}
+  * @const
+  */
   this.LOAD_FAILED_ERROR = "Couldn't fetch all the results, please try again later";
 
   /**
-  * Dom values
+  * @member {string}
+  * @const
   */
   this.CALCULATE_BUTTON = "mglt-calculate-btn";
+  /**
+  * @member {string}
+  * @const
+  */
   this.MGLT_INPUT = "mglt-input";
+  /**
+  * @member {string}
+  * @const
+  */
   this.IGNORE_UNKNOWN_PITSTOPS_CHECK = "ignore-unknowns-chk";
+  /**
+  * @member {string}
+  * @const
+  */
   this.STARSHIP_LIST = "starship-list";
+  /**
+  * @member {string}
+  * @const
+  */
   this.LOADER = "loader";
+  /**
+  * @member {string}
+  * @const
+  */
   this.ERROR_MESSAGE = "error-message";
 }
 
@@ -218,7 +245,6 @@ Main.prototype.allowUnknownPitstops = function() {
 };
 
 /**
-* @function
 * Says whether the app is working
 * @param {string} title The title of the app
 * @return {boolean} Whether the app is working

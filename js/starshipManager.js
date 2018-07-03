@@ -1,9 +1,13 @@
 /**
-* @constructor
-* This StarshipManager will allow a user to request starships and perform actions on a given starship
+* This defines the starting api entry point
+* @constructor StarshipManager
+* @classdesc This StarshipManager will allow a user to request starships and perform actions on a given starship
 * e.g. Get a given starship's consumables available in hours
 */
 StarshipManager = function(){
+  /**
+  * @member {string}
+  */
   this.nextRequest = "https://swapi.co/api/starships/";
 };
 
