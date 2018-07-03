@@ -2,6 +2,7 @@ input:invalid {
   background-color: pink;
 }
 
-.error-message {
+#error-message {
   display: block;
+  color: red;
 }
