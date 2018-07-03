@@ -14,14 +14,21 @@
     <h2>How far are you planning to travel? (in mega lights)</h2>
     <input type="number" min="1" max="1000000000" id="mglt-input" value="1" required />
     <button id="mglt-calculate-btn">Calculate pitstops</button>
-    <input type="checkbox" id="ignore-unknowns-chk"/> <label for="ignore-unknowns-chk">Exclude unkown answers</label>
+    <input type="checkbox" id="ignore-unknowns-chk"/> <label for="ignore-unknowns-chk" class="noselect">Exclude unknown answers</label>
     <div id="loader" class="loading-spinner"></div>
     <span id="error-message"></span>
-    <ul id="starship-list">
-    </ul>
+
+    <table id="starship-list">
+      <thead>
+        <tr>
+          <th>Starship Name</th>
+          <th>Pitstops required</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
   </div>
-
-
   <script src="js/starshipManager.js"></script>
   <script src="js/main.js"></script>
 </body>

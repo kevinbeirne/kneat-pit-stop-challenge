@@ -2,7 +2,42 @@ input:invalid {
   background-color: pink;
 }
 
+table {
+  width: 100%;
+  max-width: 600px;
+  padding-top: 25px;
+}
+
+td, th {
+  border: 2px solid #CCCCCC;
+  padding: 2px;
+  width: 50%;
+  max-width: 400px;
+}
+
+
+tr:nth-child(even) {
+  background-color: #E2E2E2;
+}
+
+span {
+  position: absolute;
+}
+
 #error-message {
   display: block;
   color: red;
+}
+
+/**
+* From https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting
+*/
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                        supported by Chrome and Opera */
 }

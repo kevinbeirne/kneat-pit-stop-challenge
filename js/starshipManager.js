@@ -1,5 +1,5 @@
 /**
-* @class
+* @constructor
 * This StarshipManager will allow a user to request starships and perform actions on a given starship
 * e.g. Get a given starship's consumables available in hours
 */
@@ -9,7 +9,7 @@ StarshipManager = function(){
 
 /**
 * This will load a batch of starships from the swapi.
-* @return {Promise} A promise that will resolve when the starships are loaded. Is null if all starships have been loaded. Another request to this service after it returns null will begin loading the starships from the beginning
+* @return {Promise<Object[]>} A promise that will resolve with an array of starships if they are successfully loaded. Is null if all starships have been loaded. Another request to this service after it returns null will begin loading the starships from the beginning
 */
 StarshipManager.prototype.loadMoreStarships = function() {
   if(!this.nextRequest) {//Reached the end of our requests, let user know by returning null
@@ -24,11 +24,14 @@ StarshipManager.prototype.loadMoreStarships = function() {
 
     xhttp.open("GET", self.nextRequest, true);
     xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.timeout = 2000;
+    xhttp.addEventListener("timeout",  function() {
+      return reject("timeout");
+    });
     xhttp.addEventListener("load",  function() {
       var response = JSON.parse(xhttp.responseText);
       if(xhttp.status == 200) {
         if(response.results && response.results.constructor === Array) {
-          //results.push(...response.results); <- Preferable
           for(var i = 0; i < response.results.length; i++){
             results.push(response.results[i]);
           }

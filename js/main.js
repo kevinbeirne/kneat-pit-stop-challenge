@@ -1,7 +1,7 @@
 
 
 /**
-* @class Entry point for the app
+* @constructor
 * This class controls the DOM for our pitstop calculator app
 * It will set up an interface that allows a user to enter a number of Megalights and will display
 * all the starships and the total amount of stops required to make the given distance.
@@ -59,34 +59,36 @@ Main.prototype.onCalculatePitstops = function() {
 */
 Main.prototype.calculateStarshipPitstops = function() {
   this.clearStarships();
-  this.starshipManager.loadMoreStarships().then(this.getMoreStarships.bind(this), this.loadFailed.bind(this));
+  this.starshipManager.loadMoreStarships().then(this.onGetStarships.bind(this), this.loadFailed.bind(this));
 };
 
 /**
-* This will update the pitstops of our
+* Updates our pitstops with the results we've received and then attempts to load more starships if they are available
+* @param {Object[]} starships The starships we just received
 */
-Main.prototype.getMoreStarships = function(results) {
-  this.updatePitstops(results);
+Main.prototype.onGetStarships = function(starships) {
+  this.updatePitstops(starships);
   var promise = this.starshipManager.loadMoreStarships();
   if(promise) {
-    promise.then(this.getMoreStarships.bind(this), this.loadFailed.bind(this));
+    promise.then(this.onGetStarships.bind(this), this.loadFailed.bind(this));
   } else {
     this.toggleLoading();
   }
 };
 
 /**
-* Clear any partially loaded data and display an error if we fail to load starsgips
+* Clears any partially loaded starships and displays an error if we fail to load any starships
 */
 Main.prototype.loadFailed = function() {
   this.clearStarships();
+  this.toggleLoading();
   this.setErrorMessage(this.LOAD_FAILED_ERROR);
 };
 
 
 /**
 * Goes through each of the given starships and displays them
-* @param {array} starships An array of the starships we want to update the pitstops of. Should each have name, MGLT and consumables properties
+* @param {Object[]} starships An array of the starships we want to update the pitstops of. Should each have name, MGLT and consumables properties
 */
 Main.prototype.updatePitstops = function(starships) {
   var distance = this.getDistance();
@@ -107,34 +109,43 @@ Main.prototype.updatePitstops = function(starships) {
 };
 
 /**
-* Clears the display of all starships
-*/
-Main.prototype.clearStarships = function() {
-  var starshipList = document.getElementById(this.STARSHIP_LIST);
-  if(starshipList) {
-    starshipList.innerHTML = "";
-  }
-};
-
-/**
-* Displays the given sparship with the given detail by adding it to a list
+* Displays the given starship with the given detail by adding it to a list
 * @param {string} name The name of the ship we want to display
 * @param {string} detail The detail about this ship we want to display
 */
 Main.prototype.displayStarship = function(name, detail) {
-  var starshipList = document.getElementById(this.STARSHIP_LIST);
-  if(starshipList) {
-    var li = document.createElement("li");
-    var span = document.createElement("span");
-    span.appendChild(document.createTextNode(name + ": " + detail));
-    li.appendChild(span);
-    starshipList.appendChild(li);
+  var starshipTable = document.getElementById(this.STARSHIP_LIST);
+  if(starshipTable) {
+    var tbody = starshipTable.getElementsByTagName('tbody');
+    if(tbody && tbody.length > 0 && tbody[0]) {
+      var tr = document.createElement("tr");
+      var tdName = document.createElement("td");
+      var tdDetail = document.createElement("td");
+      tdName.appendChild(document.createTextNode(name));
+      tdDetail.appendChild(document.createTextNode(detail));
+      tr.appendChild(tdName);
+      tr.appendChild(tdDetail);
+      tbody[0].appendChild(tr);
+    }
   }
 };
 
+/**
+* Clears the display of all starships
+*/
+Main.prototype.clearStarships = function() {
+  var starshipTable = document.getElementById(this.STARSHIP_LIST);
+  if(starshipTable) {
+    var tbody = starshipTable.getElementsByTagName('tbody');
+    if(tbody && tbody.length > 0 && tbody[0]) {
+      tbody[0].innerHTML = "";
+    }
+  }
+};
 
 /**
-* Toggles whether app is loading or not
+* Toggles whether app is loading or not.
+* Will update display and enable/disable any controls that shouldn't be allowed when app is loading
 * @return {boolean} Whether the app is loading after the toggle
 */
 Main.prototype.toggleLoading = function() {
@@ -155,6 +166,10 @@ Main.prototype.toggleLoading = function() {
   var input = document.getElementById(this.MGLT_INPUT);
   if(input) {
     input.disabled = this.loading;
+  }
+  var unknowns = document.getElementById(this.IGNORE_UNKNOWN_PITSTOPS_CHECK);
+  if(unknowns) {
+    unknowns.disabled = this.loading;
   }
   return this.loading;
 };
