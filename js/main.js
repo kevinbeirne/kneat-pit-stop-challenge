@@ -4,14 +4,21 @@
 *@class Entry point for the app
 */
 function Main() {
-  this.DISTANCE_ERROR = "Please enter a valid distance";
+  this.loading = false;
 
+  this.DISTANCE_ERROR = "Please enter a valid distance";
+  this.LOAD_FAILED_ERROR = "Couldn't fetch all the results, please try again later";
+
+
+  /**
+  * Dom values
+  */
   this.CALCULATE_BUTTON = "mglt-calculate-btn";
   this.MGLT_INPUT = "mglt-input";
+  this.IGNORE_UNKNOWNS_CHECK = "ignore-unknowns-chk";
+  this.STARSHIP_LIST = "starship-list";
   this.LOADER = "loader";
   this.ERROR_MESSAGE = "error-message";
-  this.STARSHIP_LIST = "starship-list";
-  this.loading = false;
 }
 
 Main.prototype.getCalculateButton = function() {
@@ -19,27 +26,93 @@ Main.prototype.getCalculateButton = function() {
 };
 
 Main.prototype.init = function() {
-  this.swApi = new SwApiManager();
+  this.starshipManager = new StarshipManager();
   var calculateBtn = document.getElementById(this.CALCULATE_BUTTON);
   var self = this;
 
-  if(calculateBtn){
-  calculateBtn.addEventListener("click", function(evt) {
-      if(self.getDistance() > 0) {
-
-        self.toggleLoading();
-        self.setErrorMessage("");
-        self.getStarships().then(self.updatePitstops.bind(self));
-      } else {
-        self.setErrorMessage(self.DISTANCE_ERROR);
-      }
-    }, false);
+  if(calculateBtn) {
+    calculateBtn.addEventListener("click", function(evt) {
+        if(self.getDistance() > 0) {
+          self.toggleLoading();
+          self.setErrorMessage("");
+          self.calculateStarshipPitstops();
+        } else {
+          self.setErrorMessage(self.DISTANCE_ERROR);
+        }
+      }, false);
   }
 };
 
+
 Main.prototype.calculateStarshipPitstops = function() {
+  this.clearSpaceships();
+  this.starshipManager.loadMoreStarships().then(this.getMoreStarships.bind(this), this.loadFailed.bind(this));
+};
+
+Main.prototype.getMoreStarships = function(results) {
+  this.updatePitstops(results);
+  var promise = this.starshipManager.loadMoreStarships();
+  if(promise) {
+    promise.then(this.getMoreStarships.bind(this), this.loadFailed.bind(this));
+  } else {
+    this.toggleLoading();
+  }
+};
+
+Main.prototype.loadFailed = function() {
+  this.clearSpaceships();
+  this.setErrorMessage(this.LOAD_FAILED_ERROR);
+};
+
+Main.prototype.updatePitstops = function(res) {
+  var distance = this.getDistance();
+
+
+  for(var i = 0; i < res.length; i++) {
+    var AMOUNT = 0;
+    var UNIT = 1;
+    var consumables = res[i].consumables.split(" ");
+    var consumablesInHours = -1;//Fix this
+    if(consumables.length == 2){
+      consumablesInHours = this.starshipManager.getConsumablesInHours(consumables[AMOUNT], consumables[UNIT]);
+    }
+
+    if(distance < 0 || consumablesInHours < 0 || res[i].MGLT == "unknown" || res[i].MGLT < 0) {
+      var unknowns = document.getElementById(this.IGNORE_UNKNOWNS_CHECK);
+      if(unknowns && !unknowns.checked) {
+        this.displaySpaceship(res[i].name, "unknown");
+      }
+    } else {
+      var stopsRequired = Math.floor(distance / (res[i].MGLT * consumablesInHours));
+      this.displaySpaceship(res[i].name, stopsRequired);
+    }
+  }
 
 };
+
+Main.prototype.clearSpaceships = function() {
+  var starshipList = document.getElementById(this.STARSHIP_LIST);
+  if(starshipList) {
+    starshipList.innerHTML = "";
+  }
+};
+
+/**
+* @param {string} name The name of the ship we want to display
+* @param {string} detail The detail about this ship we want to display
+*/
+Main.prototype.displaySpaceship = function(name, detail) {
+  console.log(name + ": " + detail);
+  var starshipList = document.getElementById(this.STARSHIP_LIST);
+  if(starshipList) {
+    var li = document.createElement("li");
+    var span = document.createElement("span");
+    span.appendChild(document.createTextNode(name + ": " + detail));
+    li.appendChild(span);
+    starshipList.appendChild(li);
+  }
+};
+
 
 /**
 * Updates the dom to the loading state
@@ -81,94 +154,6 @@ Main.prototype.getDistance = function() {
   return -1;
 };
 
-Main.prototype.getStarships = function(ctx) {
-  return this.swApi.getStarships();
-
-};
-
-Main.prototype.updatePitstops = function(res) {
-this.toggleLoading();
-this.clearSpaceships();
-
-var distance = this.getDistance();
-  console.log("res");
-  console.log(res);
-  console.log(res.length);
-
-
-  for(var i = 0; i < res.length; i++) {
-    var AMOUNT = 0;
-    var UNIT = 1;
-    var consumables = res[i].consumables.split(" ");
-    var consumablesInHours = -1;//Fix this
-    if(consumables.length == 2){
-      consumablesInHours = this.getConsumablesInHours(consumables[AMOUNT], consumables[UNIT]);
-    }
-    if(distance < 0 || consumablesInHours < 0 || res[i].MGLT == "unknown" || res[i].MGLT < 0){
-      this.displaySpaceship(res[i].name, "unknown");
-    } else {
-    console.log("consumablesInHours");
-    console.log(consumablesInHours);
-      var stopsRequired = Math.floor(distance / (res[i].MGLT * consumablesInHours));
-      this.displaySpaceship(res[i].name, stopsRequired);
-    }
-  }
-
-};
-
-Main.prototype.clearSpaceships = function(name, detail) {
-  var starshipList = document.getElementById(this.STARSHIP_LIST);
-  if(starshipList) {
-    starshipList.innerHTML = "";
-  }
-}
-
-/**
-* @param {string} name The name of the ship we want to display
-* @param {string} detail The detail about this ship we want to display
-*/
-Main.prototype.displaySpaceship = function(name, detail) {
-  console.log(name + ": " + detail);
-  var starshipList = document.getElementById(this.STARSHIP_LIST);
-  if(starshipList) {
-    var li = document.createElement("li");
-    var span = document.createElement("span");
-    span.appendChild(document.createTextNode(name + ": " + detail));
-    li.appendChild(span);
-    starshipList.appendChild(li);
-  }
-};
-
-/**
-* Reads the given amount and unit and returns how long the consumables will last, in hours
-*/
-Main.prototype.getConsumablesInHours = function(amount, unit) {
-  var HOURS_PER_YEAR = 8766;
-  var DAYS_PER_YEAR = 365;
-  var WEEKS_PER_YEAR = 52;
-  var MONTHS_PER_YEAR = 12;
-
-  var consumablesInHours = -1;
-
-  if(!isNaN(amount) && typeof(unit == "string")) {
-    consumablesInHours = amount;
-
-    if(unit.startsWith("day")) {
-      consumablesInHours *= HOURS_PER_YEAR / DAYS_PER_YEAR;
-    } else if(unit.startsWith("week")) {
-      consumablesInHours *= HOURS_PER_YEAR / WEEKS_PER_YEAR;
-    } else if(unit.startsWith("month")) {
-      consumablesInHours *= HOURS_PER_YEAR / MONTHS_PER_YEAR;
-    } else if (unit.startsWith("year")) {
-      consumablesInHours *= HOURS_PER_YEAR;
-    } else {
-      consumablesInHours = -1;
-    }
-  }
-  return consumablesInHours;
-};
-
-
 /**
 * @function
 * Says whether the app is working
@@ -178,7 +163,7 @@ Main.prototype.getConsumablesInHours = function(amount, unit) {
 Main.prototype.isWorking = function(title) {
   console.log(title + " is working!");
   return true;
-}
+};
 
 var m = new Main();
 m.init();
