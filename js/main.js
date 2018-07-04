@@ -65,7 +65,6 @@ var Main = (function() {
   * @memberof Main
   */
   var init = function() {
-    //starshipManager = new StarshipManager();
     var calculateBtn = document.getElementById(CALCULATE_BUTTON);
 
     if(calculateBtn) {
@@ -102,7 +101,6 @@ var Main = (function() {
   */
   var onGetStarships = function(starships) {
     updatePitstops(starships);
-    console.log(starships);
     var promise = starshipManager.loadMoreStarships();
     if(promise) {
       promise.then(onGetStarships.bind(this), loadFailed.bind(this));
@@ -206,6 +204,7 @@ var Main = (function() {
 
   /**
   * Sends the given error message to the user
+  * @param {string} message The message we want to show
   */
   var setErrorMessage = function(message) {
     var messageBox = document.getElementById("error-message");
@@ -247,20 +246,10 @@ var Main = (function() {
     return(excludeUnknowns && !excludeUnknowns.checked);
   };
 
-  /**
-  * Says whether the app is working
-  * @param {string} title The title of the app
-  * @return {boolean} Whether the app is working
-  */
-  var isWorking = function(title) {
-    console.log(title + " is working!");
-    return true;
-  };
 
 
   return {
-    init: init,
-    isWorking: isWorking
+    init: init
   };
 })();
 
