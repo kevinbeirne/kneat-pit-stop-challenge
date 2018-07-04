@@ -7,7 +7,11 @@
 * It will give feedback to the user about whether their request was successful
 */
 var Main = (function() {
-  var starshipManager = require("./starshipManager");
+  //var StarshipManager = require("./starshipManager");
+  var Promise = require('promise-polyfill');
+
+  var StarshipManager = require("./starshipManager");
+  var starshipManager = new StarshipManager();
 
   /**
   * @member {boolean}
@@ -98,6 +102,7 @@ var Main = (function() {
   */
   var onGetStarships = function(starships) {
     updatePitstops(starships);
+    console.log(starships);
     var promise = starshipManager.loadMoreStarships();
     if(promise) {
       promise.then(onGetStarships.bind(this), loadFailed.bind(this));
@@ -115,26 +120,21 @@ var Main = (function() {
     setErrorMessage(LOAD_FAILED_ERROR);
   };
 
-
   /**
   * Goes through each of the given starships and displays them
   * @param {Object[]} starships An array of the starships we want to update the pitstops of. Should each have name, MGLT and consumables properties
   */
   var updatePitstops = function(starships) {
-    var distance = getDistance();
     for(var i = 0; i < starships.length; i++) {
-      var consumablesInHours = starshipManager.getConsumablesInHours(starships[i]);
-
-      if(distance < 0 || consumablesInHours < 0 || starships[i].MGLT == "unknown" || starships[i].MGLT < 0) {
+      var stopsRequired = starshipManager.getPitstopsNeeded(starships[i], getDistance());
+      if(stopsRequired == -1) {
         if(allowUnknownPitstops()) {
           displayStarship(starships[i].name, "unknown");
         }
       } else {
-        var stopsRequired = Math.floor(distance / (starships[i].MGLT * consumablesInHours));
         displayStarship(starships[i].name, stopsRequired);
       }
     }
-
   };
 
   /**
