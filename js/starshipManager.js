@@ -51,6 +51,7 @@ var StarshipManager = function() {
       nextRequest = BASE_API_URL;
       return null;
     }
+
     return new Promise(function(resolve, reject) {
       var INVALID_RESPONSE_ERROR = "Server provided invalid response";
       var NO_RESULTS_ERROR = "No results were in the response";
@@ -72,7 +73,7 @@ var StarshipManager = function() {
           try {
             response = JSON.parse(xhttp.responseText);
           } catch (e) {
-            return reject(INVALID_RESPONSE_ERROR);
+            reject(INVALID_RESPONSE_ERROR);
           }
 
           if(response.results && response.results.constructor === Array && response.results.length > 0) {
@@ -95,7 +96,7 @@ var StarshipManager = function() {
           }
         }
         if(err) {
-          return reject(err);
+          reject(err);
         }
 
         resolve(results);
