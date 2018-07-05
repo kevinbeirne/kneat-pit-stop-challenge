@@ -3,10 +3,10 @@
     "name": "kneat-challenge",
     "version": "1.0.0",
     "scripts": {
-        "test": "jasmine JASMINE_CONFIG_PATH=spec/support/jasmine.json",
+        "tests": "jasmine JASMINE_CONFIG_PATH=spec/support/jasmine.json",
         "start": "node server.js",
         "build": "browserify js/main.js -o app.js",
-        "docs": "jsdoc js/"
+        "docs": "jsdoc js/ -d docs"
     },
     "devDependencies": {
         "browserify": "^16.2.2",
