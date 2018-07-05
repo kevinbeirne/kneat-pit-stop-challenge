@@ -41,7 +41,7 @@ then open the docs/index.html folder to see the compiled docs
 * The corresponding html is in index.html
 * CSS is in css/
 * Tests can be found in spec/
-* **NOTE:** If you downloaded the precompiled version of this application, ignore the specs in /jasmine/spec as these have been are compiled versions
+* **NOTE:** If you downloaded the precompiled version of this application, ignore the specs in /jasmine/spec as these are compiled versions of the tests
 
 
 ## Other notes
