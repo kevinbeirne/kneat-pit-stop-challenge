@@ -1,3 +1,48 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+@import url('https://fonts.googleapis.com/css?family=Raleway');
+
+body {
+  text-align: center;
+}
+
+.container {
+  display: inline-block;
+}
+
+h1 {
+  padding: 0px 0 10px 0;
+  text-align: center;
+}
+
+h1, h2, table, button, input {
+  font-family: "Roboto";
+  letter-spacing: 1px;
+}
+label {
+  font-family: "Roboto";
+  font-size: 1em;
+}
+
+h2 {
+  font-size: 1.1em;
+  text-align: left;
+}
+
+span {
+  font-family: "Raleway";
+  font-size: 0.85em;
+}
+
+span {
+  position: absolute;
+  padding-top: 3px;
+}
+
+
+.check {
+  display: inline-block;
+  vertical-align: middle;
+}
 input:invalid {
   background-color: pink;
 }
@@ -5,23 +50,27 @@ input:invalid {
 table {
   width: 100%;
   max-width: 600px;
-  padding-top: 25px;
+  margin-top: 25px;
+  border-spacing: 0;
+  border: 2px solid #CCCCCC;
 }
 
-td, th {
-  border: 2px solid #CCCCCC;
-  padding: 2px;
+th {
+  font-size: 1.1em;
+  background-color: #3A3A3A;
+  color: #FFD409;
+}
+
+th {
   width: 50%;
   max-width: 400px;
 }
 
-
+td:nth-child(even), th:nth-child(even) {
+border-left: 2px solid #CCCCCC;
+}
 tr:nth-child(even) {
   background-color: #E2E2E2;
-}
-
-span {
-  position: absolute;
 }
 
 #error-message {
