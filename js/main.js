@@ -1,12 +1,12 @@
 /**
-* Defaults the loading to false and establishes constants for our error messages and DOM elements
+* Defaults the loading to false and establishes constants for our error messages and DOM elements.
 * @constructor Main
 * @classdesc This class controls the DOM for our pitstop calculator app
 * It will set up an interface that allows a user to enter a number of Megalights and will display
 * all the starships and the total amount of stops required to make the given distance.
-* It will give feedback to the user about whether their request was successful
+* It will give feedback to the user about whether their request was successful.
 */
-var Main = (function() {
+var Main = function() {
   var Promise = require('promise-polyfill');
 
   var StarshipManager = require("./starshipManager");
@@ -17,57 +17,67 @@ var Main = (function() {
   */
   var loading = false;
   /**
+  * Error message for invalid distance
   * @member {string}
   * @const
   */
   var DISTANCE_ERROR = "Please enter a valid distance (number from 1-1000000000)";
   /**
+  * Error message for failing to load results
   * @member {string}
   * @const
   */
   var LOAD_FAILED_ERROR = "Couldn't fetch all the results, please try again later";
 
   /**
+  * Message we display when there is an unknown number of pitstops required
   * @member {string}
   * @const
   */
-  var CALCULATE_BUTTON = "mglt-calculate-btn";
+  var UNKNOWN_MESSAGE = "Unknown";
+
+  /**
+  * DOM access for calculate
+  * @member {string}
+  * @const
+  */
+  var DOM_CALCULATE_BUTTON = "mglt-calculate-btn";
   /**
   * @member {string}
   * @const
   */
-  var MGLT_INPUT = "mglt-input";
+  var DOM_MGLT_INPUT = "mglt-input";
   /**
   * @member {string}
   * @const
   */
-  var IGNORE_UNKNOWN_PITSTOPS_CHECK = "ignore-unknowns-chk";
+  var DOM_IGNORE_UNKNOWN_PITSTOPS_CHECK = "ignore-unknowns-chk";
   /**
   * @member {string}
   * @const
   */
-  var STARSHIP_LIST = "starship-list";
+  var DOM_STARSHIP_LIST = "starship-list";
   /**
   * @member {string}
   * @const
   */
-  var LOADER = "loader";
+  var DOM_LOADER = "loader";
   /**
   * @member {string}
   * @const
   */
-  var ERROR_MESSAGE = "error-message";
+  var DOM_ERROR_MESSAGE = "error-message";
 
 
   /**
   * Initialises the app and enables user controls to calculate starship pitstops
   * @memberof Main
   */
-  var init = function() {
-    var calculateBtn = document.getElementById(CALCULATE_BUTTON);
+  Main.prototype.init = function() {
+    var calculateBtn = document.getElementById(DOM_CALCULATE_BUTTON);
 
     if(calculateBtn) {
-      calculateBtn.addEventListener("click", onCalculatePitstops.bind(this), false);
+      calculateBtn.addEventListener("click", onCalculatePitstops, false);
     }
   };
 
@@ -91,7 +101,7 @@ var Main = (function() {
   */
   var calculateStarshipPitstops = function() {
     clearStarships();
-    starshipManager.loadMoreStarships().then(onGetStarships.bind(this), loadFailed.bind(this));
+    starshipManager.loadMoreStarships().then(onGetStarships, loadFailed);
   };
 
   /**
@@ -102,7 +112,7 @@ var Main = (function() {
     updatePitstops(starships);
     var promise = starshipManager.loadMoreStarships();
     if(promise) {
-      promise.then(onGetStarships.bind(this), loadFailed.bind(this));
+      promise.then(onGetStarships, loadFailed);
     } else {
       toggleLoading();
     }
@@ -126,7 +136,7 @@ var Main = (function() {
       var stopsRequired = starshipManager.getPitstopsNeeded(starships[i], getDistance());
       if(stopsRequired == -1) {
         if(allowUnknownPitstops()) {
-          displayStarship(starships[i].name, "unknown");
+          displayStarship(starships[i].name, UNKNOWN_MESSAGE);
         }
       } else {
         displayStarship(starships[i].name, stopsRequired);
@@ -140,7 +150,7 @@ var Main = (function() {
   * @param {string} detail The detail about this ship we want to display
   */
   var displayStarship = function(name, detail) {
-    var starshipTable = document.getElementById(STARSHIP_LIST);
+    var starshipTable = document.getElementById(DOM_STARSHIP_LIST);
     if(starshipTable) {
 
       var tbody = starshipTable.getElementsByTagName('tbody');
@@ -161,7 +171,7 @@ var Main = (function() {
   * Clears the display of all starships
   */
   var clearStarships = function() {
-    var starshipTable = document.getElementById(STARSHIP_LIST);
+    var starshipTable = document.getElementById(DOM_STARSHIP_LIST);
     if(starshipTable) {
       var tbody = starshipTable.getElementsByTagName('tbody');
       if(tbody && tbody.length > 0 && tbody[0]) {
@@ -178,7 +188,7 @@ var Main = (function() {
   var toggleLoading = function() {
     loading = !loading;
 
-    var loader = document.getElementById("loader");
+    var loader = document.getElementById(DOM_LOADER);
     if(loader) {
       if(loading) {
         loader.style.visibility = "visible";
@@ -186,15 +196,15 @@ var Main = (function() {
         loader.style.visibility = "hidden";
       }
     }
-    var calculateBtn = document.getElementById(CALCULATE_BUTTON);
+    var calculateBtn = document.getElementById(DOM_CALCULATE_BUTTON);
     if(calculateBtn) {
       calculateBtn.disabled = loading;
     }
-    var input = document.getElementById(MGLT_INPUT);
+    var input = document.getElementById(DOM_MGLT_INPUT);
     if(input) {
       input.disabled = loading;
     }
-    var unknowns = document.getElementById(IGNORE_UNKNOWN_PITSTOPS_CHECK);
+    var unknowns = document.getElementById(DOM_IGNORE_UNKNOWN_PITSTOPS_CHECK);
     if(unknowns) {
       unknowns.disabled = loading;
     }
@@ -206,7 +216,7 @@ var Main = (function() {
   * @param {string} message The message we want to show
   */
   var setErrorMessage = function(message) {
-    var messageBox = document.getElementById("error-message");
+    var messageBox = document.getElementById(DOM_ERROR_MESSAGE);
     if(messageBox) {
       messageBox.innerHTML = message;
     }
@@ -217,7 +227,7 @@ var Main = (function() {
   * @return {number} The distance the user has entered or -1 if the user input was invalid or undetectable
   */
   var getDistance = function() {
-    var input = document.getElementById(MGLT_INPUT);
+    var input = document.getElementById(DOM_MGLT_INPUT);
     if(input && input.value && !isNaN(input.value)) {
       return parseInt(input.value);
     }
@@ -229,7 +239,7 @@ var Main = (function() {
   * @return {number} The max distance a user can enter. -1 If not found.
   */
   var getMaxDistance = function() {
-    var input = document.getElementById(MGLT_INPUT);
+    var input = document.getElementById(DOM_MGLT_INPUT);
     if(input && input.max && !isNaN(input.max)) {
       return parseInt(input.max);
     }
@@ -241,22 +251,12 @@ var Main = (function() {
   * @return {boolean} True if unknowns are allowed, false otherwise
   */
   var allowUnknownPitstops = function() {
-    var excludeUnknowns = document.getElementById(IGNORE_UNKNOWN_PITSTOPS_CHECK);
+    var excludeUnknowns = document.getElementById(DOM_IGNORE_UNKNOWN_PITSTOPS_CHECK);
     return(excludeUnknowns && !excludeUnknowns.checked);
   };
 
-
-
-  return {
-    init: init
-  };
-})();
+};
 
 (function(){
-  Main.init();
+  new Main().init();
 })();
-
-if ( typeof module !== 'undefined' && module.hasOwnProperty('exports') )
-{
-    module.exports = Main;
-}

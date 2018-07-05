@@ -1,10 +1,10 @@
 
 
 /**
-* Applies polyfills
+* Applies polyfills.
 * @constructor StarshipManager
-* @classdesc This StarshipManager will allow a user to request starships and perform actions on a given starship
-* e.g. Get a given starship's consumables available in hours
+* @classdesc This StarshipManager will allow a user to request starships and perform actions on a given starship.
+* e.g. Get a given starship's consumables available in hours.
 */
 var StarshipManager = function() {
   var Promise = require('promise-polyfill');
@@ -19,15 +19,21 @@ var StarshipManager = function() {
 
 
   /**
+  * The api url string for getting starships
   * @member {string}
   * @const
   */
   var BASE_API_URL = "https://swapi.co/api/starships/";
   /**
+  * The url the manager will next use to load starships
   * @member {string}
   */
   var nextRequest = BASE_API_URL;
 
+  /**
+  * Gets the api url string for getting starships
+  * @return {string} The name of the starship api
+  */
   StarshipManager.prototype.getStarshipApiUrl = function() {
     return BASE_API_URL;
   };
