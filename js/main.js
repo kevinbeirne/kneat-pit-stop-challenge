@@ -7,7 +7,6 @@
 * It will give feedback to the user about whether their request was successful
 */
 var Main = (function() {
-  //var StarshipManager = require("./starshipManager");
   var Promise = require('promise-polyfill');
 
   var StarshipManager = require("./starshipManager");
@@ -21,7 +20,7 @@ var Main = (function() {
   * @member {string}
   * @const
   */
-  var DISTANCE_ERROR = "Please enter a valid distance";
+  var DISTANCE_ERROR = "Please enter a valid distance (number from 1-1000000000)";
   /**
   * @member {string}
   * @const

@@ -4,9 +4,8 @@
     "version": "1.0.0",
     "scripts": {
         "test": "jasmine JASMINE_CONFIG_PATH=spec/support/jasmine.json",
-        "start": "nodemon src/server.js",
-        "build": "babel src -d dist",
-        "serve": "node dist/server.js"
+        "start": "node server.js",
+        "build": "browserify js/main.js -o app.js"
     },
     "devDependencies": {
         "babel-cli": "^6.26.0",

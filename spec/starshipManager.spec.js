@@ -111,6 +111,9 @@ describe("StarshipManager starship loader", function() {
   var starshipManager;
   var xhr;
   var urls;
+  var baseUrl;
+  var REJECT_PROMISE_FAIL = "Test failed: Shouldn't reject promise";
+  var RESOLVE_PROMISE_FAIL = "Test failed: Shouldn't have resolved promise";
   beforeEach(() => {
     starshipManager = new StarshipManager();
     xhr = {//create dummy XMLHttpRequest
@@ -120,114 +123,128 @@ describe("StarshipManager starship loader", function() {
         xhr.responseText = urls[_url_].responseText;
         xhr.statusText = urls[_url_].statusText;
       },
-      send: function() {
-        setTimeout(xhr.onload, 1);
-      },
-      setRequestHeader: function(header, value) {
-      },
-      onload: function(){},
-      ontimeout: function(){}
+      send: () => setTimeout(xhr.onload, 1),
+      setRequestHeader: (header, value) => {},
+      onload: () => {},
+      ontimeout: () =>{}
     };
     urls = {};
-      XMLHttpRequest = jasmine.createSpy(xhr).and.returnValue(xhr);
+    baseUrl = starshipManager.getStarshipApiUrl();
+    /*Simulate XMLHttpRequest
+    NOTE: Simplicitic implementation only suitable for these tests.*/
+    XMLHttpRequest = jasmine.createSpy(xhr).and.returnValue(xhr);
+  });
+
+  it("should get starship api url", function() {
+    expect(baseUrl).toEqual(jasmine.any(String));
   });
 
   it("should provide starships", function(done) {
     var results = [{"name":"ships1"}];
-    urls = {
-      'https://swapi.co/api/starships/': {
-        responseText: JSON.stringify({count:37,next:"https://swapi.co/api/starships/?page=2",previous:null,results:results}),
+    var url = starshipManager.getStarshipApiUrl();
+    urls[baseUrl] = {
+        responseText: JSON.stringify({count:1,next: baseUrl + "?page=2",previous:null,results:results}),
         status: 200
-      }
-    };
-    starshipManager.loadMoreStarships().then(function(response) {
-      expect(response).toEqual(results);
-      done();
-    }, function() {
-      fail("Shouldn't reject promise");
-    });
+      };
+    starshipManager.loadMoreStarships()
+      .then((response) => {
+        expect(response).toEqual(results);
+        done();
+      },
+      ()=>fail(REJECT_PROMISE_FAIL));
   });
 
   it("should change the starships it provides based on the next parameter", function(done) {
     var results1 = [{"name":"ships1"}];
     var results2 = [{"name":"ships2"}];
-    urls = {
-      "https://swapi.co/api/starships/": {
-        responseText: JSON.stringify({count:37,next:"https://swapi.co/api/starships/?page=2",previous:null,results:results1}),
-        status: 200
-      },
-      "https://swapi.co/api/starships/?page=2": {
-        responseText: JSON.stringify({count:37,next:"https://swapi.co/api/starships/?page=3",previous:null,results:results2}),
-        status: 200
-      }
+    urls[baseUrl] = {
+      responseText: JSON.stringify({count:2,next:baseUrl + "?page=2",previous:null,results:results1}),
+      status: 200
     };
-    starshipManager.loadMoreStarships().then(function(response) {
-      expect(response).toEqual(results1);
-      starshipManager.loadMoreStarships().then(function(response) {
-        expect(response).toEqual(results2);
-        done();
-      }, function() {
-        fail("Shouldn't reject promise");
-      });
-    }, function() {
-      fail("Shouldn't reject promise");
-    });
+    urls[baseUrl + "?page=2"] = {
+      responseText: JSON.stringify({count:2,next:baseUrl +"?page=3",previous:null,results:results2}),
+      status: 200
+    };
+    starshipManager.loadMoreStarships()
+      .then((response) => {
+        expect(response).toEqual(results1);
+        starshipManager.loadMoreStarships().then((response) => {
+          expect(response).toEqual(results2);
+          done();
+        },
+        ()=>fail(REJECT_PROMISE_FAIL));
+      },
+      ()=>fail(REJECT_PROMISE_FAIL));
   });
 
   it("Should provide the first set of starships if we reset it", function(done) {
     var results1 = [{"name":"ships1"}];
     var results2 = [{"name":"ships2"}];
-    urls = {
-      "https://swapi.co/api/starships/": {
-        responseText: JSON.stringify({count:37,next:"https://swapi.co/api/starships/?page=2",previous:null,results:results1}),
-        status: 200
-      },
-      "https://swapi.co/api/starships/?page=2": {
-        responseText: JSON.stringify({count:37,next:"https://swapi.co/api/starships/?page=3",previous:null,results:results2}),
-        status: 200
-      }
+    urls[baseUrl] = {
+      responseText: JSON.stringify({count:2,next:baseUrl + "?page=2",previous:null,results:results1}),
+      status: 200
     };
-    starshipManager.loadMoreStarships(false).then(function(response) {
-      expect(response).toEqual(results1);
-      starshipManager.loadMoreStarships(true).then(function(response) {
+    urls[baseUrl + "?page=2"] = {
+      responseText: JSON.stringify({count:2,next: baseUrl +"?page=3",previous:null,results:results2}),
+      status: 200
+    };
+    starshipManager.loadMoreStarships(false)
+      .then((response)=> {
         expect(response).toEqual(results1);
-        done();
-      });
-    });
+        starshipManager.loadMoreStarships(true)//NOTE: fromStart set to true, should get results1 again
+          .then((response)=> {
+            expect(response).toEqual(results1);
+            done();
+          },
+          ()=> fail(REJECT_PROMISE_FAIL));
+      },
+      ()=> fail(REJECT_PROMISE_FAIL));
   });
 
   it("should tell us when there are no more starships to fetch", function(done) {
     var results1 = [{"name":"ships1"}];
     var results2 = [{"name":"ships2"}];
-    urls = {
-      "https://swapi.co/api/starships/": {
-        responseText: JSON.stringify({count:37,next:null,previous:null,results:results1}),
-        status: 200
-      }
+    urls[baseUrl] = {
+      responseText: JSON.stringify({count:2,next:null,previous:null,results:results1}),
+      status: 200
     };
-    starshipManager.loadMoreStarships(false).then(function(response) {
-      expect(response).toEqual(results1);
-      var shouldBeNull = starshipManager.loadMoreStarships(false);
-      expect(shouldBeNull).toBe(null);
-      done();
-    });
+    starshipManager.loadMoreStarships(false)
+      .then((response)=> {
+        expect(response).toEqual(results1);
+        var shouldBeNull = starshipManager.loadMoreStarships(false);
+        expect(shouldBeNull).toBe(null);
+        done();
+      },
+      ()=> fail(REJECT_PROMISE_FAIL));
   });
-/*
+
+
   it("should tell us if the reponse didn't have starships in it", function(done) {
     var results1 = [{"name":"ships1"}];
     var results2 = [{"name":"ships2"}];
-    urls = {
-      "https://swapi.co/api/starships/": {
-        responseText: JSON.stringify({count:37,next:null,previous:null}),
-        status: 200
-      }
+    urls [baseUrl] = {
+      responseText: JSON.stringify({count:37,next:null,previous:null}),
+      status: 200
     };
-    starshipManager.loadMoreStarships(false).then(function() {
-      fail("Shouldn't resolve");
-    }, function(response) {//rejected it's promise
-      done();
-    });
+    starshipManager.loadMoreStarships(false)
+      .then(() => fail(RESPOND_PROMISE_FAIL),
+      (response) => {//Rejected promise
+        expect(response).toEqual(jasmine.any(String));//Custom error message
+        done();
+      });
+  });
 
-  });*/
-
+  it("should reject if we fail to contact the api", function(done) {
+    var results1 = [{"name":"ships1"}];
+    var results2 = [{"name":"ships2"}];
+    urls[baseUrl] = {
+      status: 404
+    };
+    starshipManager.loadMoreStarships(false)
+      .then(() => fail(RESPOND_PROMISE_FAIL),
+      (response) => {//rejected it's promise
+        expect(response).toEqual(404);
+        done();
+      });
+  });
 });

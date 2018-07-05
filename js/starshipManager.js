@@ -22,11 +22,15 @@ var StarshipManager = function() {
   * @member {string}
   * @const
   */
-  var BASE_API_REQUEST = "https://swapi.co/api/starships/";
+  var BASE_API_URL = "https://swapi.co/api/starships/";
   /**
   * @member {string}
   */
-  var nextRequest = BASE_API_REQUEST;
+  var nextRequest = BASE_API_URL;
+
+  StarshipManager.prototype.getStarshipApiUrl = function() {
+    return BASE_API_URL;
+  };
 
   /**
   * This will load a batch of starships from the swapi.
@@ -35,13 +39,17 @@ var StarshipManager = function() {
   */
   StarshipManager.prototype.loadMoreStarships = function(fromStart) {
     if(fromStart && fromStart == true) {
-      nextRequest = BASE_API_REQUEST;
+      nextRequest = BASE_API_URL;
     }
     if(!nextRequest) {//Reached the end of our requests, let user know by returning null
-      nextRequest = BASE_API_REQUEST;
+      nextRequest = BASE_API_URL;
       return null;
     }
     return new Promise(function(resolve, reject) {
+      var INVALID_RESPONSE_ERROR = "Server provided invalid response";
+      var NO_RESULTS_ERROR = "No results were in the response";
+      var NO_STATUS_CODE_ERROR = "Unknown error, no status code returned";
+
       var xhttp = new XMLHttpRequest();
       var results = [];
       var err = null;
@@ -58,19 +66,27 @@ var StarshipManager = function() {
           try {
             response = JSON.parse(xhttp.responseText);
           } catch (e) {
-            return reject("Server provided invalid response");
+            return reject(INVALID_RESPONSE_ERROR);
           }
-          if(response.results && response.results.constructor === Array) {
+
+          if(response.results && response.results.constructor === Array && response.results.length > 0) {
             for(var i = 0; i < response.results.length; i++){
               results.push(response.results[i]);
             }
             nextRequest = response.next;
           } else {
-            err = "No results were in the response";
+            err = NO_RESULTS_ERROR;
           }
+
         } else {
           nextRequest = null;
-          err = xhttp.statusText;
+          if(xhttp.statusText) {
+            err = xhttp.statusText;
+          } else if(xhttp.status) {
+            err = xhttp.status;
+          } else {
+            err = NO_STATUS_CODE_ERROR;
+          }
         }
         if(err) {
           return reject(err);
@@ -79,7 +95,6 @@ var StarshipManager = function() {
         resolve(results);
       };
       xhttp.send();
-
     });
   };
 
